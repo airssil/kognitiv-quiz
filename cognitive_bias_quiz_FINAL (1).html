@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Квиз: Когнитивные искажения</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("pJylUgyIFzACqqMn6");</script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple-light: #EEEDFE; --purple-mid: #534AB7; --purple-dark: #3C3489; --purple-text: #26215C;
+    --green-light: #EAF3DE; --green-border: #3B6D11; --green-text: #27500A;
+    --red-light: #FCEBEB; --red-border: #A32D2D; --red-text: #501313;
+    --gray-bg: #F7F6F2; --gray-border: rgba(0,0,0,0.12); --text: #1a1a1a; --text-muted: #666;
+  }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--gray-bg); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; color: var(--text); }
+  .container { width: 100%; max-width: 680px; }
+  header { text-align: center; margin-bottom: 2rem; }
+  header .badge { display: inline-block; background: var(--purple-light); color: var(--purple-text); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
+  header h1 { font-family: 'Lora', serif; font-size: 26px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  header p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+  .progress-bar-bg { flex: 1; height: 3px; background: #EEECEA; border-radius: 2px; }
+  .progress-bar-fill { height: 3px; background: var(--purple-mid); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .card { background: #fff; border-radius: 16px; border: 0.5px solid var(--gray-border); padding: 1.75rem; }
+  .q-number { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple-mid); margin-bottom: 10px; }
+  .situation { background: var(--gray-bg); border-left: 3px solid var(--purple-mid); border-radius: 0 8px 8px 0; padding: 0.875rem 1rem; font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 1.25rem; }
+  .q-text { font-size: 16px; font-weight: 500; margin-bottom: 1rem; color: var(--text); }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--gray-border); border-radius: 10px; padding: 0.75rem 1rem; font-size: 15px; font-family: 'Source Sans 3', sans-serif; color: var(--text); cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s; line-height: 1.4; }
+  .option-btn:hover:not(:disabled) { background: var(--gray-bg); border-color: var(--purple-mid); transform: translateX(2px); }
+  .option-btn.correct { background: var(--green-light); border: 1.5px solid var(--green-border); color: var(--green-text); }
+  .option-btn.wrong { background: var(--red-light); border: 1.5px solid var(--red-border); color: var(--red-text); }
+  .option-btn:disabled { cursor: default; transform: none; }
+  .feedback { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 10px; font-size: 14px; line-height: 1.6; }
+  .feedback.ok { background: var(--green-light); color: var(--green-text); border: 0.5px solid var(--green-border); }
+  .feedback.no { background: var(--red-light); color: var(--red-text); border: 0.5px solid var(--red-border); }
+  .nav-btn { margin-top: 1.25rem; background: var(--purple-mid); color: #fff; border: none; border-radius: 10px; padding: 0.65rem 1.5rem; font-size: 15px; font-family: 'Source Sans 3', sans-serif; cursor: pointer; transition: background 0.15s; }
+  .nav-btn:hover { background: var(--purple-dark); }
+  .name-screen { text-align: center; padding: 0.5rem 0; }
+  .name-screen h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+  .name-screen p { font-size: 14px; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+  .name-input { width: 100%; border: 1px solid var(--gray-border); border-radius: 10px; padding: 0.75rem 1rem; font-size: 16px; font-family: 'Source Sans 3', sans-serif; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .name-input:focus { border-color: var(--purple-mid); }
+  .start-btn { margin-top: 1rem; background: var(--purple-mid); color: #fff; border: none; border-radius: 10px; padding: 0.65rem 1.75rem; font-size: 15px; font-family: 'Source Sans 3', sans-serif; cursor: pointer; transition: background 0.15s; }
+  .start-btn:hover { background: var(--purple-dark); }
+  .score-wrap { text-align: center; padding: 0.5rem 0; }
+  .score-circle { width: 110px; height: 110px; border-radius: 50%; background: var(--purple-light); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+  .score-num { font-size: 36px; font-weight: 600; color: var(--purple-mid); line-height: 1; }
+  .score-of { font-size: 13px; color: var(--purple-text); margin-top: 2px; }
+  .score-msg { font-family: 'Lora', serif; font-size: 18px; color: var(--text); margin-bottom: 0.5rem; }
+  .score-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 1rem; }
+  .result-list { list-style: none; text-align: left; margin: 0 0 1.25rem; }
+  .result-list li { font-size: 14px; padding: 6px 0; border-bottom: 0.5px solid var(--gray-border); display: flex; gap: 8px; color: var(--text); }
+  .result-list li:last-child { border-bottom: none; }
+  .section-badge { display: inline-block; background: #FAEEDA; color: #412402; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
+  .section-title { font-family: 'Lora', serif; font-size: 20px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  .section-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+  .def-table { width: 100%; border-collapse: collapse; }
+  .def-table th { font-size: 13px; font-weight: 600; color: var(--purple-text); background: var(--purple-light); padding: 10px 12px; text-align: center; border: 1px solid #CECBF6; }
+  .def-table th.row-header { text-align: left; min-width: 150px; }
+  .def-table td { border: 1px solid var(--gray-border); padding: 6px 8px; vertical-align: top; }
+  .def-table td.row-label { background: #F7F6F2; padding: 10px 12px; }
+  .def-table td.row-label .label-main { font-size: 14px; font-weight: 600; color: var(--purple-mid); }
+  .def-table td.row-label .label-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .cell-input { width: 100%; border: none; background: transparent; font-size: 14px; font-family: 'Source Sans 3', sans-serif; color: var(--text); resize: vertical; min-height: 60px; outline: none; line-height: 1.5; padding: 4px 2px; }
+  .cell-input:focus { background: #FAFAFA; }
+  .submit-section { margin-top: 1.5rem; text-align: center; }
+  .submit-note { font-size: 13px; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6; }
+  .submit-btn { background: var(--purple-mid); color: #fff; border: none; border-radius: 10px; padding: 0.75rem 2rem; font-size: 15px; font-family: 'Source Sans 3', sans-serif; cursor: pointer; transition: background 0.15s; }
+  .submit-btn:hover { background: var(--purple-dark); }
+  .submit-btn:disabled { opacity: 0.6; cursor: default; }
+  .submitted-msg { background: var(--green-light); color: var(--green-text); border: 0.5px solid var(--green-border); border-radius: 12px; padding: 1.25rem; text-align: center; font-size: 15px; line-height: 1.6; margin-top: 1rem; }
+  .submitted-msg strong { display: block; font-size: 17px; margin-bottom: 4px; }
+  .error-msg { background: var(--red-light); color: var(--red-text); border: 0.5px solid var(--red-border); border-radius: 12px; padding: 1rem; font-size: 14px; line-height: 1.6; margin-top: 1rem; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .fallback-box { width: 100%; height: 150px; font-size: 12px; border: 1px solid var(--gray-border); border-radius: 8px; padding: 8px; font-family: monospace; margin-top: 8px; }
+  .copy-btn { margin-top: 0.5rem; background: transparent; border: 1px solid var(--purple-mid); color: var(--purple-mid); border-radius: 8px; padding: 0.4rem 1rem; font-size: 13px; font-family: 'Source Sans 3', sans-serif; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="badge">🧠 Когнитивные искажения</div>
+    <h1>Определи когнитивное искажение</h1>
+    <p>Прочитай каждую ситуацию и выбери правильный ответ.</p>
+  </header>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress" style="width:0%"></div></div>
+    <div class="progress-label" id="prog-label"></div>
+  </div>
+  <div class="card" id="quiz-body"></div>
+</div>
+
+<script>
+const SERVICE_ID  = "service_nuce17k";
+const TEMPLATE_ID = "template_fgbe6qj";
+
+const questions = [
+  { situation: "Алексей уверен, что определённая диета — самая эффективная. Он читает только статьи и отзывы, которые подтверждают её пользу, и игнорирует исследования с противоположными выводами.", question: "Какое это когнитивное искажение?", options: ["A) Иллюзия контроля", "B) Конфирмационный биас", "C) Эффект доступности"], correct: 1, explanation: "Конфирмационный биас — склонность искать и принимать только ту информацию, которая подтверждает уже имеющиеся убеждения." },
+  { situation: "Марина играет в лотерею и уверена, что если она выберет «правильную стратегию» покупки билетов, то сможет повысить свои шансы на выигрыш.", question: "Какое это когнитивное искажение?", options: ["A) Иллюзия контроля", "B) Иллюзорная корреляция", "C) Ошибка выжившего"], correct: 0, explanation: "Иллюзия контроля — убеждённость в том, что можно влиять на случайные события, которые на самом деле от нас не зависят." },
+  { situation: "После просмотра новостей о нескольких авиакатастрофах Иван начинает считать, что летать на самолёте крайне опасно, хотя статистически это один из самых безопасных видов транспорта.", question: "Какое это когнитивное искажение?", options: ["A) Конфирмационный биас", "B) Эффект доступности", "C) Иллюзия контроля"], correct: 1, explanation: "Эффект доступности — яркие, легко вспоминаемые события заставляют нас переоценивать их вероятность." },
+  { situation: "Учитель замечает, что несколько учеников, которые носят очки, хорошо учатся, и делает вывод, что ношение очков связано с высоким интеллектом.", question: "Какое это когнитивное искажение?", options: ["A) Иллюзорная корреляция", "B) Эффект доступности", "C) Ошибка выжившего"], correct: 0, explanation: "Иллюзорная корреляция — восприятие связи между двумя явлениями там, где её на самом деле нет или она случайна." },
+  { situation: "Предприниматель изучает истории успеха известных бизнесменов и делает вывод, что если он будет действовать так же, то обязательно добьётся успеха, не учитывая множество провалившихся компаний.", question: "Какое это когнитивное искажение?", options: ["A) Конфирмационный биас", "B) Ошибка выжившего", "C) Иллюзия контроля"], correct: 1, explanation: "Ошибка выжившего — мы учитываем только «выживших» (успешных), игнорируя огромное число неудачных случаев." }
+];
+
+const rows = [
+  { key: "synonym",     label: "Синоним",     hint: "Близкое по смыслу слово" },
+  { key: "example",     label: "Пример",      hint: "Иллюстрация из жизни" },
+  { key: "stipulation", label: "Стипуляция",  hint: "Уточнение в данном контексте" },
+  { key: "condition",   label: "Необходимое и достаточное условие", hint: "Что делает понятие именно таким" }
+];
+const cols = ["государство", "друг", "зависть"];
+
+let phase = "name", studentName = "", current = 0, score = 0, answered = [];
+
+function render() {
+  const body = document.getElementById('quiz-body');
+  if      (phase === "name")  renderName(body);
+  else if (phase === "quiz")  renderQuiz(body);
+  else if (phase === "score") renderScore(body);
+  else if (phase === "table") renderTable(body);
+}
+
+function renderName(body) {
+  document.getElementById('progress').style.width = '0%';
+  document.getElementById('prog-label').textContent = '';
+  body.innerHTML = `
+    <div class="name-screen">
+      <h2>Добро пожаловать!</h2>
+      <p>Введите своё имя и фамилию перед началом.<br>Они будут включены в ваши ответы.</p>
+      <input class="name-input" id="name-field" type="text" placeholder="Имя Фамилия" maxlength="80"/>
+      <br><button class="start-btn" onclick="startQuiz()">Начать квиз →</button>
+    </div>`;
+  const f = document.getElementById('name-field');
+  f.addEventListener('keydown', e => { if (e.key === 'Enter') startQuiz(); });
+  setTimeout(() => f.focus(), 50);
+}
+
+function startQuiz() {
+  const val = document.getElementById('name-field').value.trim();
+  if (!val) { document.getElementById('name-field').style.borderColor = '#A32D2D'; return; }
+  studentName = val; phase = "quiz"; render();
+}
+
+function renderQuiz(body) {
+  const pct = ((current + 1) / questions.length) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = (current + 1) + ' / ' + questions.length;
+  const q = questions[current], state = answered[current];
+  body.innerHTML = `
+    <div class="q-number">Вопрос ${current + 1} из ${questions.length}</div>
+    <div class="situation">${q.situation}</div>
+    <div class="q-text">${q.question}</div>
+    <div class="options">
+      ${q.options.map((o, i) => {
+        let cls = 'option-btn';
+        if (state !== undefined) { if (i === q.correct) cls += ' correct'; else if (i === state) cls += ' wrong'; }
+        return `<button class="${cls}" ${state !== undefined ? 'disabled' : ''} onclick="choose(${i})">${o}</button>`;
+      }).join('')}
+    </div>
+    ${state !== undefined ? `<div class="feedback ${state === q.correct ? 'ok' : 'no'}">${state === q.correct ? '✓ Верно! ' : '✗ Неверно. '}${q.explanation}</div>` : ''}
+    ${state !== undefined ? `<button class="nav-btn" onclick="nextQ()">${current < questions.length - 1 ? 'Следующий вопрос →' : 'Посмотреть результат →'}</button>` : ''}`;
+}
+
+function choose(idx) {
+  if (answered[current] !== undefined) return;
+  answered[current] = idx;
+  if (idx === questions[current].correct) score++;
+  render();
+}
+
+function nextQ() { current++; if (current >= questions.length) phase = "score"; render(); }
+
+function renderScore(body) {
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('prog-label').textContent = '✓ Квиз завершён';
+  const pct = Math.round((score / questions.length) * 100);
+  const msg = score === questions.length ? 'Отлично! Все ответы верны.' : score >= 3 ? 'Хороший результат!' : 'Стоит повторить тему.';
+  const results = questions.map((q, i) => {
+    const ok = answered[i] === q.correct;
+    return `<li><span>${ok ? '✓' : '✗'}</span><span>Вопрос ${i+1}: ${ok ? 'верно' : 'неверно — правильный: ' + q.options[q.correct]}</span></li>`;
+  }).join('');
+  body.innerHTML = `
+    <div class="score-wrap">
+      <div class="score-circle"><div class="score-num">${score}/${questions.length}</div><div class="score-of">${pct}%</div></div>
+      <div class="score-msg">${msg}</div>
+      <div class="score-sub">Результаты по вопросам:</div>
+      <ul class="result-list">${results}</ul>
+      <button class="nav-btn" onclick="goTable()">Перейти к заданию 2 →</button>
+    </div>`;
+}
+
+function goTable() { phase = "table"; render(); }
+
+function renderTable(body) {
+  document.getElementById('prog-label').textContent = 'Задание 2';
+  body.innerHTML = `
+    <div class="section-badge">Задание 2</div>
+    <div class="section-title">Таблица определений</div>
+    <div class="section-desc">Впишите в каждый пропуск свои варианты для определения каждого из понятий.</div>
+    <div style="overflow-x:auto">
+      <table class="def-table">
+        <thead><tr>
+          <th class="row-header">Способ определения</th>
+          ${cols.map(c => `<th>${c}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr>
+            <td class="row-label"><div class="label-main">${r.label}</div><div class="label-sub">${r.hint}</div></td>
+            ${cols.map(c => `<td><textarea class="cell-input" id="cell_${r.key}_${c}" placeholder="Введите ответ..."></textarea></td>`).join('')}
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="submit-section">
+      <div class="submit-note">Нажмите кнопку — ваши ответы будут отправлены преподавателю по email.</div>
+      <button class="submit-btn" id="submit-btn" onclick="submitAnswers()">Отправить ответы →</button>
+      <div id="submit-result"></div>
+    </div>`;
+}
+
+async function submitAnswers() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Отправка...';
+
+  const tableLines = rows.map(r =>
+    r.label.toUpperCase() + '\n' +
+    cols.map(c => {
+      const val = document.getElementById('cell_' + r.key + '_' + c).value.trim() || '(не заполнено)';
+      return '  ' + c + ': ' + val;
+    }).join('\n')
+  ).join('\n\n');
+
+  const quizLines = questions.map((q, i) => {
+    const ok = answered[i] === q.correct;
+    return '  Вопрос ' + (i+1) + ': ' + (ok ? '✓ верно' : '✗ неверно (правильный: ' + q.options[q.correct] + ')');
+  }).join('\n');
+
+  const message =
+'Студент: ' + studentName + '\n' +
+'Дата: ' + new Date().toLocaleDateString('ru-RU') + '\n\n' +
+'━━━ КВИЗ — ' + score + '/' + questions.length + ' (' + Math.round(score/questions.length*100) + '%) ━━━\n' +
+quizLines + '\n\n' +
+'━━━ ЗАДАНИЕ 2 — Таблица определений ━━━\n' +
+tableLines;
+
+  try {
+    await emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+      student_name: studentName,
+      message: message
+    });
+    document.getElementById('submit-result').innerHTML =
+      '<div class="submitted-msg"><strong>Ответы отправлены!</strong>Преподаватель получил ваши ответы.</div>';
+    btn.style.display = 'none';
+  } catch (err) {
+    const fallback = message.replace(/</g, '&lt;');
+    document.getElementById('submit-result').innerHTML =
+      '<div class="error-msg">Не удалось отправить автоматически. Скопируйте текст ниже и отправьте преподавателю вручную:<br>' +
+      '<textarea class="fallback-box" readonly>' + message + '</textarea>' +
+      '<button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector(\'.fallback-box\').value).then(()=>this.textContent=\'✓ Скопировано!\')">Скопировать</button>' +
+      '</div>';
+    btn.disabled = false;
+    btn.innerHTML = 'Попробовать снова →';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
